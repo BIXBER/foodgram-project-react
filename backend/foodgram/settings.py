@@ -25,7 +25,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'users.apps.Usersconfig',
+    'users.apps.UsersConfig',
     'recipes.apps.RecipesConfig'
 ]
 
@@ -73,6 +73,8 @@ DATABASES = {
         'PORT': os.getenv('DB_PORT', 5432)
     }
 }
+
+AUTH_USER_MODEL = 'users.User'
 
 
 # Password validation
