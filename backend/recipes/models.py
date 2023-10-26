@@ -21,12 +21,20 @@ class Tag(BaseNamedModel):
         null=True,
     )
 
+    class Meta(BaseNamedModel.Meta):
+        verbose_name = 'Тег'
+        verbose_name_plural = 'Теги'
+
 
 class Ingredient(BaseNamedModel):
     measurement_unit = models.CharField(
         'Единица измерения',
         max_length=200,
     )
+
+    class Meta(BaseNamedModel.Meta):
+        verbose_name = 'Ингредиент'
+        verbose_name_plural = 'Ингредиенты'
 
 
 class Recipe(models.Model):
@@ -63,6 +71,14 @@ class Recipe(models.Model):
         validators=[MinValueValidator(1)],
     )
 
+    class Meta:
+        verbose_name = 'Рецепт'
+        verbose_name_plural = 'Рецепты'
+        ordering = ('name',)
+
+    def __str__(self):
+        return self.name
+
 
 class IngredientRecipe(models.Model):
     ingredient = models.ForeignKey(
@@ -79,17 +95,26 @@ class IngredientRecipe(models.Model):
         'Количество в рецепте',
     )
 
+    def __str__(self):
+        return f'"{self.ingredient}" есть в рецепте "{self.recipe}".'
+
 
 class Cart(BaseRecipeModel):
 
     class Meta(BaseRecipeModel.Meta):
         pass
 
+    def __str__(self):
+        return f'"{self.recipe}" есть в корзине у пользователя {self.user}.'
+
 
 class Favorite(BaseRecipeModel):
 
     class Meta(BaseRecipeModel.Meta):
         pass
+
+    def __str__(self):
+        return f'"{self.recipe}" есть в избранном у пользователя {self.user}.'
 
 
 class Follow(models.Model):
@@ -115,4 +140,4 @@ class Follow(models.Model):
         )
 
     def __str__(self):
-        return f'{self.user} подписан на {self.following}'
+        return f'{self.user} подписан на {self.following}.'
