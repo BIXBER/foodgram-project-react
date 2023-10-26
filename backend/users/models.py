@@ -29,22 +29,17 @@ class User(AbstractUser):
     first_name = models.CharField(
         _('first name'),
         max_length=150,
-        blank=False,
     )
     last_name = models.CharField(
         _('last name'),
         max_length=150,
-        blank=False,
     )
     password = models.CharField(
         _('password'),
         max_length=150,
-        blank=False
     )
 
-    REQUIRED_FIELDS = ['email', 'first_name', 'last_name', 'password']
-    USERNAME_FIELD = 'username'
-    EMAIL_FIELD = 'email'
+    REQUIRED_FIELDS = ['email', 'first_name', 'last_name']
 
     class Meta:
         verbose_name = _('User')
