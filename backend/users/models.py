@@ -39,7 +39,8 @@ class User(AbstractUser):
         max_length=150,
     )
 
-    REQUIRED_FIELDS = ['email', 'first_name', 'last_name']
+    REQUIRED_FIELDS = ['username', 'first_name', 'last_name']
+    USERNAME_FIELD = 'email'
 
     class Meta:
         verbose_name = _('User')
