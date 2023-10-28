@@ -3,6 +3,7 @@ from django.core.validators import MinValueValidator
 from django.db import models
 
 from core.models import BaseRecipeModel, BaseNamedModel
+from .validators import hex_validator
 
 User = get_user_model()
 
@@ -11,6 +12,7 @@ class Tag(BaseNamedModel):
     color = models.CharField(
         'Цвет в HEX',
         max_length=7,
+        validators=[hex_validator],
         blank=True,
         null=True,
     )
