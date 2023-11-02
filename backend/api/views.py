@@ -3,26 +3,25 @@ from django_filters.rest_framework import DjangoFilterBackend
 from djoser.views import UserViewSet
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
-from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
+from django.shortcuts import get_object_or_404
 
-from recipes.models import Tag, Ingredient, Recipe
-from .serializers import (UserCreateSerializer,
-                          UserSerializer,
-                          TagSerializer,
-                          IngredientSerializer,
-                          RecipeSerializer)
+from recipes.models import Tag, Ingredient, Recipe, Follow
+from .serializers import (UserCreateSerializer, UserSerializer,
+                          TagSerializer, IngredientSerializer,
+                          RecipeSerializer, SubscribeSerializer,
+                          FollowSerializer,)
 from .mixins import RetrieveListViewSet
 from .permissions import AuthorOrReadOnly
+
 
 User = get_user_model()
 
 
-class UserView(UserViewSet):
+class UserViewSet(UserViewSet):
     serializer_class = UserCreateSerializer
-    pagination_class = LimitOffsetPagination
 
     @action(
         detail=False,
@@ -33,15 +32,55 @@ class UserView(UserViewSet):
         serializer = UserSerializer(request.user)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
+    @action(
+        methods=('POST', 'DELETE'),
+        detail=True,
+        permission_classes=[IsAuthenticated],
+    )
+    def subscribe(self, request, id):
+        user = get_object_or_404(User, pk=id)
+        following = request.user
+        data = {'user': user.id, 'following': following.id}
+        if request.method == 'POST':
+            serializer = FollowSerializer(
+                data=data,
+                context={'request': request}
+            )
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        get_object_or_404(
+            Follow,
+            user=user,
+            following=request.user,
+        ).delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
-class TagView(RetrieveListViewSet):
+    @action(
+        methods=('GET',),
+        detail=False,
+        permission_classes=[IsAuthenticated],
+    )
+    def subscriptions(self, request):
+        return self.get_paginated_response(
+            SubscribeSerializer(
+                self.paginate_queryset(
+                    Follow.objects.filter(following=request.user)
+                ),
+                many=True,
+                context={'request': request}
+            ).data
+        )
+
+
+class TagViewSet(RetrieveListViewSet):
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
     permission_classes = (AllowAny,)
     pagination_class = None
 
 
-class IngredientView(RetrieveListViewSet):
+class IngredientViewSet(RetrieveListViewSet):
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
     permission_classes = (AllowAny,)
@@ -50,11 +89,10 @@ class IngredientView(RetrieveListViewSet):
     filterset_fields = ('name',)
 
 
-class RecipeView(viewsets.ModelViewSet):
+class RecipeViewSet(viewsets.ModelViewSet):
     queryset = Recipe.objects.all()
     serializer_class = RecipeSerializer
     permission_classes = (AuthorOrReadOnly,)
-    pagination_class = LimitOffsetPagination
 
     def get_queryset(self):
         queryset = super().get_queryset()
