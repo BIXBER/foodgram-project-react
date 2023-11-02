@@ -27,6 +27,9 @@ class Tag(BaseNamedModel):
         verbose_name = 'Тег'
         verbose_name_plural = 'Теги'
 
+    def __str__(self):
+        return self.name
+
 
 class Ingredient(BaseNamedModel):
     measurement_unit = models.CharField(
@@ -37,6 +40,9 @@ class Ingredient(BaseNamedModel):
     class Meta(BaseNamedModel.Meta):
         verbose_name = 'Ингредиент'
         verbose_name_plural = 'Ингредиенты'
+
+    def __str__(self):
+        return self.name
 
 
 class Recipe(models.Model):
@@ -63,7 +69,7 @@ class Recipe(models.Model):
     )
     image = models.ImageField(
         'Ссылка на картинку на сайте',
-        upload_to='recipes/',
+        upload_to='recipes/images/',
     )
     text = models.TextField(
         'Описание',
@@ -90,11 +96,13 @@ class IngredientRecipe(models.Model):
     )
     recipe = models.ForeignKey(
         Recipe,
-        on_delete=models.CASCADE,
+        on_delete=models.SET_NULL,
+        null=True,
         verbose_name='Рецепт',
     )
     amount = models.PositiveSmallIntegerField(
         'Количество в рецепте',
+        validators=[MinValueValidator(1)],
     )
 
     def __str__(self):
