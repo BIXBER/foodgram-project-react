@@ -30,7 +30,6 @@ class BaseNamedModel(models.Model):
     name = models.CharField(
         'Название',
         max_length=200,
-        unique=True,
         db_index=True,
     )
 

@@ -27,9 +27,6 @@ class Tag(BaseNamedModel):
         verbose_name = 'Тег'
         verbose_name_plural = 'Теги'
 
-    def __str__(self):
-        return self.name
-
 
 class Ingredient(BaseNamedModel):
     measurement_unit = models.CharField(
@@ -40,6 +37,12 @@ class Ingredient(BaseNamedModel):
     class Meta(BaseNamedModel.Meta):
         verbose_name = 'Ингредиент'
         verbose_name_plural = 'Ингредиенты'
+        constraints = (
+            models.UniqueConstraint(
+                fields=('name', 'measurement_unit'),
+                name='unique_ingredient',
+            ),
+        )
 
     def __str__(self):
         return self.name
