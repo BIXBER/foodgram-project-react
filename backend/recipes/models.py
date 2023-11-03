@@ -3,6 +3,7 @@ from django.core.validators import MinValueValidator
 from django.db import models
 
 from core.models import BaseRecipeModel, BaseNamedModel
+from .validators import hex_validator
 
 User = get_user_model()
 
@@ -11,6 +12,7 @@ class Tag(BaseNamedModel):
     color = models.CharField(
         'Цвет в HEX',
         max_length=7,
+        validators=[hex_validator],
         blank=True,
         null=True,
     )
@@ -25,6 +27,9 @@ class Tag(BaseNamedModel):
         verbose_name = 'Тег'
         verbose_name_plural = 'Теги'
 
+    def __str__(self):
+        return self.name
+
 
 class Ingredient(BaseNamedModel):
     measurement_unit = models.CharField(
@@ -35,6 +40,9 @@ class Ingredient(BaseNamedModel):
     class Meta(BaseNamedModel.Meta):
         verbose_name = 'Ингредиент'
         verbose_name_plural = 'Ингредиенты'
+
+    def __str__(self):
+        return self.name
 
 
 class Recipe(models.Model):
@@ -61,7 +69,7 @@ class Recipe(models.Model):
     )
     image = models.ImageField(
         'Ссылка на картинку на сайте',
-        upload_to='recipes/',
+        upload_to='recipes/images/',
     )
     text = models.TextField(
         'Описание',
@@ -88,11 +96,13 @@ class IngredientRecipe(models.Model):
     )
     recipe = models.ForeignKey(
         Recipe,
-        on_delete=models.CASCADE,
+        on_delete=models.SET_NULL,
+        null=True,
         verbose_name='Рецепт',
     )
     amount = models.PositiveSmallIntegerField(
         'Количество в рецепте',
+        validators=[MinValueValidator(1)],
     )
 
     def __str__(self):
@@ -102,7 +112,9 @@ class IngredientRecipe(models.Model):
 class Cart(BaseRecipeModel):
 
     class Meta(BaseRecipeModel.Meta):
-        pass
+        default_related_name = 'shopping_cart'
+        verbose_name = "Список покупок"
+        verbose_name = "Списки покупок"
 
     def __str__(self):
         return f'"{self.recipe}" есть в корзине у пользователя {self.user}.'
@@ -111,7 +123,9 @@ class Cart(BaseRecipeModel):
 class Favorite(BaseRecipeModel):
 
     class Meta(BaseRecipeModel.Meta):
-        pass
+        default_related_name = 'favorites'
+        verbose_name = 'Избранный рецепт'
+        verbose_name_plural = 'Избранные рецепты'
 
     def __str__(self):
         return f'"{self.recipe}" есть в избранном у пользователя {self.user}.'
@@ -135,7 +149,7 @@ class Follow(models.Model):
         constraints = (
             models.UniqueConstraint(
                 fields=('user', 'following'),
-                name='unique_follower',
+                name='unique_following',
             ),
         )
 
