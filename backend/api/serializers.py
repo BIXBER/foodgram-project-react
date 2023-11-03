@@ -11,9 +11,7 @@ from rest_framework.fields import ReadOnlyField
 from rest_framework.validators import UniqueTogetherValidator
 
 from recipes.models import (
-    Tag, Ingredient,
-    Recipe, IngredientRecipe, Favorite,
-    Cart, Follow
+    Tag, Ingredient, Recipe, IngredientRecipe, Favorite, Cart, Follow,
 )
 
 User = get_user_model()
@@ -61,9 +59,7 @@ class UserSerializer(serializers.ModelSerializer):
     def get_is_subscribed(self, obj):
         request = self.context.get('request')
         if request and request.user.is_authenticated:
-            return Follow.objects.filter(
-                user=request.user, following=obj.following,
-            ).exists()
+            return obj.following.filter(user=request.user).exists()
         return False
 
 
@@ -163,18 +159,16 @@ class RecipeReadSerializer(serializers.ModelSerializer):
 
 
 class RecipeSerializer(serializers.ModelSerializer):
-
     default_error_messages = {
-        'unique_ingredients': 'Ингредиенты для рецепта не должны повторяться',
-        'unique_tags': 'Теги для рецепта не должны повторяться',
-        'invalid_amount': 'Неверное количество ингредиента',
-        'no_ingredients': 'Рецепт должен содержать минимум один ингредиент',
-        'no_tags': 'Рецепт должен содержать минимум один тег',
         'ingredients_doesnt_exist': 'Такого ингредиента не существует',
-        'no_image': 'Изображение должно быть установлено для рецепта',
+        'no_ingredients': 'Рецепт должен содержать минимум один ингредиент',
+        'unique_ingredients': 'Ингредиенты для рецепта не должны повторяться',
+        'invalid_amount': 'Неверное количество ингредиента',
         'tags_doesnt_exist': 'Такого тега не существует',
+        'no_tags': 'Рецепт должен содержать минимум один тег',
+        'unique_tags': 'Теги для рецепта не должны повторяться',
+        'no_image': 'Изображение должно быть установлено для рецепта',
     }
-
     tags = serializers.PrimaryKeyRelatedField(
         many=True, queryset=Tag.objects.all(),
     )
@@ -192,7 +186,7 @@ class RecipeSerializer(serializers.ModelSerializer):
             IngredientRecipe(
                 recipe=recipe,
                 ingredient_id=ingredient_data.get('id'),
-                amount=ingredient_data.get('amount')
+                amount=ingredient_data.get('amount'),
             )
             for ingredient_data in ingredients_data
         ]
@@ -264,6 +258,40 @@ class RecipeSmallSerializer(serializers.ModelSerializer):
         model = Recipe
         fields = ('id', 'name', 'image', 'cooking_time')
         read_only_fields = ('__all__',)
+
+
+class FavoriteSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Favorite
+        fields = ('user', 'recipe')
+        validators = (
+            UniqueTogetherValidator(
+                queryset=Favorite.objects.all(),
+                fields=['recipe', 'user'],
+                message='Рецепт уже находится в Вашем избранном!',
+            ),
+        )
+
+    def to_representation(self, instance):
+        return RecipeSmallSerializer(instance.recipe).data
+
+
+class CartSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Cart
+        fields = ('user', 'recipe')
+        validators = (
+            UniqueTogetherValidator(
+                queryset=Cart.objects.all(),
+                fields=['recipe', 'user'],
+                message='Рецепт уже лежит в Вашей корзине!',
+            ),
+        )
+
+    def to_representation(self, instance):
+        return RecipeSmallSerializer(instance.recipe).data
 
 
 class SubscribeSerializer(serializers.ModelSerializer):

@@ -1,7 +1,6 @@
 from django.contrib.auth import get_user_model
 from django.core.validators import MinValueValidator
 from django.db import models
-from django.db.models import Q, F
 
 from core.models import BaseRecipeModel, BaseNamedModel
 from .validators import hex_validator
@@ -113,7 +112,9 @@ class IngredientRecipe(models.Model):
 class Cart(BaseRecipeModel):
 
     class Meta(BaseRecipeModel.Meta):
-        pass
+        default_related_name = 'shopping_cart'
+        verbose_name = "Список покупок"
+        verbose_name = "Списки покупок"
 
     def __str__(self):
         return f'"{self.recipe}" есть в корзине у пользователя {self.user}.'
@@ -122,7 +123,9 @@ class Cart(BaseRecipeModel):
 class Favorite(BaseRecipeModel):
 
     class Meta(BaseRecipeModel.Meta):
-        pass
+        default_related_name = 'favorites'
+        verbose_name = 'Избранный рецепт'
+        verbose_name_plural = 'Избранные рецепты'
 
     def __str__(self):
         return f'"{self.recipe}" есть в избранном у пользователя {self.user}.'

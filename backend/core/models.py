@@ -8,13 +8,11 @@ class BaseRecipeModel(models.Model):
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        related_name='%(class)s_recipes'.lower(),
         verbose_name='Пользователь',
     )
     recipe = models.ForeignKey(
         'Recipe',
         on_delete=models.CASCADE,
-        related_name='%(class)s_users'.lower(),
         verbose_name='Рецепт',
     )
 
