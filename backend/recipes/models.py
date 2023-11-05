@@ -15,12 +15,14 @@ class Tag(BaseNamedModel):
         validators=[hex_validator],
         blank=True,
         null=True,
+        help_text="Например: #FFF или #0F0F0F"
     )
     slug = models.SlugField(
         'Уникальный слаг',
         max_length=200,
         blank=True,
         null=True,
+        help_text='Не более 200 символов. Буквы, цифры и только @/./+/-/_'
     )
 
     class Meta(BaseNamedModel.Meta):
@@ -76,16 +78,21 @@ class Recipe(models.Model):
     )
     text = models.TextField(
         'Описание',
+        help_text='Описание способа приготовления блюда',
     )
     cooking_time = models.PositiveSmallIntegerField(
         'Время приготовления в минутах',
         validators=[MinValueValidator(1)],
     )
+    pub_date = models.DateField(
+        'Дата публикации',
+        auto_now_add=True,
+    )
 
     class Meta:
         verbose_name = 'Рецепт'
         verbose_name_plural = 'Рецепты'
-        ordering = ('name',)
+        ordering = ('name', 'pub_date')
 
     def __str__(self):
         return self.name
@@ -117,10 +124,10 @@ class Cart(BaseRecipeModel):
     class Meta(BaseRecipeModel.Meta):
         default_related_name = 'shopping_cart'
         verbose_name = "Список покупок"
-        verbose_name = "Списки покупок"
+        verbose_name_plural = "Списки покупок"
 
     def __str__(self):
-        return f'"{self.recipe}" есть в корзине у пользователя {self.user}.'
+        return f'"{self.recipe}" в корзине у пользователя {self.user}.'
 
 
 class Favorite(BaseRecipeModel):
@@ -131,7 +138,7 @@ class Favorite(BaseRecipeModel):
         verbose_name_plural = 'Избранные рецепты'
 
     def __str__(self):
-        return f'"{self.recipe}" есть в избранном у пользователя {self.user}.'
+        return f'"{self.recipe}" в избранном у пользователя {self.user}.'
 
 
 class Follow(models.Model):
@@ -139,21 +146,29 @@ class Follow(models.Model):
         User,
         related_name='follower',
         on_delete=models.CASCADE,
-        verbose_name='Пользователь'
+        verbose_name='Пользователь',
+        help_text='Укажите того, кто подписывается',
     )
     following = models.ForeignKey(
         User,
         related_name='following',
         on_delete=models.CASCADE,
         verbose_name='Подписчик',
+        help_text='Укажите того, на кого подписываются',
     )
 
     class Meta:
+        verbose_name = 'Подписка'
+        verbose_name_plural = 'Подписки'
         constraints = (
             models.UniqueConstraint(
-                fields=('user', 'following'),
                 name='unique_following',
+                fields=('user', 'following'),
             ),
+            models.CheckConstraint(
+                name='prevent_self_following',
+                check=~models.Q(user=models.F('following')),
+            )
         )
 
     def __str__(self):

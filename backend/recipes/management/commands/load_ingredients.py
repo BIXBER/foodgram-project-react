@@ -16,8 +16,10 @@ MSG_SUCCESSFUL = 'Import completed successfully!'
 MSG_UNSUCCESSFUL = 'Import failed...'
 MSG_NO_CHANGES = 'No changes detected.'
 
-ERR_FILE_NOT_EXISTS = (f"File with name '{DEFAULT_IMPORT_FILE_NAME}' "
-                      f"in folder '{DEFAULT_IMPORT_FOLDER_NAME}' is required!")
+ERR_FILE_NOT_EXISTS = (
+    f"File with name '{DEFAULT_IMPORT_FILE_NAME}' "
+    f"in folder '{DEFAULT_IMPORT_FOLDER_NAME}' is required!",
+)
 ERR_ARGS_FILE_NOT_EXISTS = ("There is no such file as '{}'")
 
 
