@@ -7,22 +7,20 @@ from .validators import hex_validator
 
 User = get_user_model()
 
+MIN_VALUE_AMOUNT = 1
+
 
 class Tag(BaseNamedModel):
     color = models.CharField(
         'Цвет в HEX',
         max_length=7,
-        validators=[hex_validator],
-        blank=True,
-        null=True,
-        help_text="Например: #FFF или #0F0F0F"
+        validators=(hex_validator,),
+        help_text="Например: #FFF или #0F0F0F",
     )
     slug = models.SlugField(
         'Уникальный слаг',
         max_length=200,
-        blank=True,
-        null=True,
-        help_text='Не более 200 символов. Буквы, цифры и только @/./+/-/_'
+        help_text='Не более 200 символов. Буквы, цифры и только @/./+/-/_',
     )
 
     class Meta(BaseNamedModel.Meta):
@@ -112,11 +110,12 @@ class IngredientRecipe(models.Model):
     )
     amount = models.PositiveSmallIntegerField(
         'Количество в рецепте',
-        validators=[MinValueValidator(1)],
+        validators=[MinValueValidator(MIN_VALUE_AMOUNT)],
     )
 
     def __str__(self):
-        return f'"{self.ingredient}" есть в рецепте "{self.recipe}".'
+        return (f'"{self.ingredient.name.capitalize()}" '
+                f'— добавлено в рецепт "{self.recipe.name.capitalize()}".')
 
 
 class Cart(BaseRecipeModel):
@@ -127,7 +126,8 @@ class Cart(BaseRecipeModel):
         verbose_name_plural = "Списки покупок"
 
     def __str__(self):
-        return f'"{self.recipe}" в корзине у пользователя {self.user}.'
+        return (f'"{self.recipe.name.capitalize()}" '
+                f'в корзине у пользователя {self.user}.')
 
 
 class Favorite(BaseRecipeModel):
@@ -138,7 +138,8 @@ class Favorite(BaseRecipeModel):
         verbose_name_plural = 'Избранные рецепты'
 
     def __str__(self):
-        return f'"{self.recipe}" в избранном у пользователя {self.user}.'
+        return (f'"{self.recipe.name.capitalize()}" '
+                f'в избранном у пользователя {self.user}.')
 
 
 class Follow(models.Model):

@@ -1,13 +1,14 @@
 from django.contrib import admin
+from django.template.loader import render_to_string
 
 from .models import (
-    Tag,
-    Ingredient,
-    Recipe,
-    Follow,
     Cart,
     Favorite,
+    Follow,
+    Ingredient,
     IngredientRecipe,
+    Recipe,
+    Tag
 )
 
 
@@ -15,9 +16,16 @@ from .models import (
 class TagAdmin(admin.ModelAdmin):
     list_display = (
         'name',
-        'color',
+        'display_color',
         'slug',
     )
+
+    def display_color(self, obj):
+        return render_to_string(
+            "admin/color_tags_display.html", context={"color": obj.color}
+        )
+    display_color.short_description = "Цвет в HEX"
+    display_color.admin_order_field = "color"
 
     def has_change_permission(self, request, obj=None):
         return request.user.is_superuser or request.user.is_staff
@@ -36,6 +44,7 @@ class IngredientAdmin(admin.ModelAdmin):
 class IngredientRecipeAdmin(admin.TabularInline):
     model = IngredientRecipe
     extra = 3
+    min_num = 1
     readonly_fields = ['measurement_unit']
     fields = ['ingredient', 'amount', 'measurement_unit']
     autocomplete_fields = ['ingredient']
@@ -43,6 +52,8 @@ class IngredientRecipeAdmin(admin.TabularInline):
     verbose_name_plural = 'Ингредиенты для рецепта'
 
     def measurement_unit(self, instance):
+        admin.site.empty_value_display = ('Выберите ингредиент для '
+                                          'отображения его единицы измерения')
         return instance.ingredient.measurement_unit
     measurement_unit.short_description = 'Единица измерения'
 
@@ -58,7 +69,6 @@ class RecipeAdmin(admin.ModelAdmin):
         'in_shopping_cart_count_display',
         'pub_date',
     )
-
     list_filter = (
         'name',
         'author',
