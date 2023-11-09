@@ -1,15 +1,9 @@
 from django.contrib import admin
+from django.template.defaultfilters import truncatechars
 from django.template.loader import render_to_string
 
-from .models import (
-    Cart,
-    Favorite,
-    Follow,
-    Ingredient,
-    IngredientRecipe,
-    Recipe,
-    Tag
-)
+from .models import (Cart, Favorite, Follow, Ingredient, IngredientRecipe,
+                     Recipe, Tag)
 
 
 @admin.register(Tag)
@@ -62,7 +56,7 @@ class IngredientRecipeAdmin(admin.TabularInline):
 class RecipeAdmin(admin.ModelAdmin):
     list_display = (
         'name',
-        'text',
+        'short_text',
         'author',
         'cooking_time',
         'in_favorite_count_display',
@@ -78,6 +72,10 @@ class RecipeAdmin(admin.ModelAdmin):
     list_display_links = ('name',)
     filter_horizontal = ('tags', 'ingredients')
     inlines = (IngredientRecipeAdmin,)
+
+    def short_text(self, obj):
+        return truncatechars(obj.text, 150)
+    short_text.short_description = 'Описание'
 
     def in_favorite_count_display(self, obj):
         return obj.favorites.count()

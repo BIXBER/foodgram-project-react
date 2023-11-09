@@ -1,31 +1,23 @@
 from django.contrib.auth import get_user_model
+from django.db.models import F, Sum
+from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from djoser.views import UserViewSet
-from rest_framework import status, viewsets, filters
+from rest_framework import filters, status, viewsets
 from rest_framework.decorators import action
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
-from rest_framework.permissions import AllowAny
-from django.shortcuts import get_object_or_404
-from django.db.models import F, Sum
 
-from recipes.models import (Tag,
-                            Ingredient,
-                            Recipe,
-                            Follow,
-                            Favorite,
-                            Cart,
-                            IngredientRecipe)
-from .serializers import (
-    UserCreateSerializer, UserSerializer, TagSerializer,
-    IngredientSerializer, RecipeSerializer, SubscribeSerializer,
-    FollowSerializer, FavoriteSerializer, CartSerializer,
-)
+from recipes.models import (Cart, Favorite, Follow, Ingredient,
+                            IngredientRecipe, Recipe, Tag)
+from .filters import IngredientSearchFilter, RecipeFilter
 from .mixins import RetrieveListViewSet
 from .permissions import AuthorOrReadOnly
-from .filters import RecipeFilter
+from .serializers import (CartSerializer, FavoriteSerializer, FollowSerializer,
+                          IngredientSerializer, RecipeSerializer,
+                          SubscribeSerializer, TagSerializer,
+                          UserCreateSerializer, UserSerializer)
 from .utils import build_file
-
 
 User = get_user_model()
 
@@ -90,7 +82,7 @@ class IngredientViewSet(RetrieveListViewSet):
     serializer_class = IngredientSerializer
     permission_classes = (AllowAny,)
     pagination_class = None
-    filter_backends = (DjangoFilterBackend, filters.SearchFilter)
+    filter_backends = (IngredientSearchFilter, DjangoFilterBackend)
     search_fields = ('name',)
 
 
@@ -98,8 +90,9 @@ class RecipeViewSet(viewsets.ModelViewSet):
     queryset = Recipe.objects.all()
     serializer_class = RecipeSerializer
     permission_classes = (AuthorOrReadOnly,)
-    filter_backends = (DjangoFilterBackend,)
+    filter_backends = (DjangoFilterBackend, filters.OrderingFilter)
     filterset_class = RecipeFilter
+    ordering = ('-pub_date',)
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)

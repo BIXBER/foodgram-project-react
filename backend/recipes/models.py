@@ -1,8 +1,8 @@
+from core.models import BaseNamedModel, BaseRecipeModel
 from django.contrib.auth import get_user_model
 from django.core.validators import MinValueValidator
 from django.db import models
 
-from core.models import BaseRecipeModel, BaseNamedModel
 from .validators import hex_validator
 
 User = get_user_model()
@@ -90,7 +90,7 @@ class Recipe(models.Model):
     class Meta:
         verbose_name = 'Рецепт'
         verbose_name_plural = 'Рецепты'
-        ordering = ('name', 'pub_date')
+        ordering = ('-pub_date', 'name')
 
     def __str__(self):
         return self.name
