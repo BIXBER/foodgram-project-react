@@ -53,15 +53,15 @@ class Command(BaseCommand):
                 self.stdout.write(self.style.NOTICE(MSG_NO_CHANGES))
             else:
                 self.stdout.write(self.style.SUCCESS(
-                    MSG_SUCCESSFUL + f' {count_rows} rows added.'
-                    )
+                    MSG_SUCCESSFUL + f' {count_rows} rows added.',
+                )
                 )
         except FileNotFoundError:
             self.stdout.write(self.style.ERROR(MSG_UNSUCCESSFUL))
             if options['filename']:
                 self.stdout.write(self.style.ERROR(
-                    ERR_ARGS_FILE_NOT_EXISTS.format(options['filename'])
-                    )
+                    ERR_ARGS_FILE_NOT_EXISTS.format(options['filename']),
+                )
                 )
             else:
                 raise CommandError(ERR_FILE_NOT_EXISTS)
