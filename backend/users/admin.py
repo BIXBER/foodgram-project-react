@@ -1,16 +1,30 @@
 from django.contrib import admin
 from django.contrib.auth import get_user_model
-
-
-class AdminUser(admin.ModelAdmin):
-
-    def save_model(self, request, obj, form, change):
-        """Fix django bug: hash password if create user in admin panel."""
-        if 'password' in form.changed_data:
-            obj.set_password(form.cleaned_data['password'])
-        super().save_model(request, obj, form, change)
-
+from django.contrib.auth.admin import UserAdmin
 
 User = get_user_model()
 
-admin.site.register(User, AdminUser)
+
+@admin.register(User)
+class AdminUser(UserAdmin):
+    list_display = (
+        'first_name',
+        'last_name',
+        'username',
+        'email',
+    )
+    list_filter = (
+        'first_name',
+        'email',
+    )
+    add_fieldsets = (
+        (None, {
+            'fields': (
+                *User.REQUIRED_FIELDS, User.USERNAME_FIELD,
+                'password1', 'password2', 'is_superuser', 'is_staff',
+            )
+        }),
+    )
+
+
+admin.site.empty_value_display = 'Не задано'

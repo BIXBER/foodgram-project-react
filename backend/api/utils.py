@@ -10,11 +10,12 @@ def build_file(user, ingredients, filename='shopping_list.txt'):
     response = HttpResponse(content_type='text/plain; charset=utf-8')
     response['Content-Disposition'] = f'attachment; filename={filename}'
 
-    writer = csv.writer(response)
+    writer = csv.writer(response, delimiter=',',
+                        quotechar='"', quoting=csv.QUOTE_MINIMAL)
     writer.writerow([f'Список покупок пользователя: {user.first_name} '
                      f'{user.last_name}', ])
     writer.writerow([f'Дата и время создания: {created_time}', ])
-    writer.writerow(['', ])
+    writer.writerow(['-----', ])
     writer.writerow(['Ингредиент', 'Количество', 'Единица измерения'])
     for ingredient in ingredients:
         writer.writerow(
@@ -24,6 +25,6 @@ def build_file(user, ingredients, filename='shopping_list.txt'):
                 ingredient['measure'],
             ]
         )
-    writer.writerow(['', ])
+    writer.writerow(['-----', ])
     writer.writerow(['*Сформировано в продуктовом помощнике Foodgram', ])
     return response

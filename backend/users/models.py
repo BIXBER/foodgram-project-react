@@ -9,7 +9,7 @@ class User(AbstractUser):
     unicode_validator = UnicodeUsernameValidator()
 
     username = models.CharField(
-        _('username'),
+        _('username').capitalize(),
         max_length=150,
         unique=True,
         help_text=_('Required. Letters, digits and @/./+/-/_ only.'),
@@ -19,7 +19,7 @@ class User(AbstractUser):
         },
     )
     email = models.EmailField(
-        _('email address'),
+        _('email address').capitalize(),
         max_length=254,
         unique=True,
         error_messages={
@@ -27,15 +27,15 @@ class User(AbstractUser):
         },
     )
     first_name = models.CharField(
-        _('first name'),
+        _('first name').capitalize(),
         max_length=150,
     )
     last_name = models.CharField(
-        _('last name'),
+        _('last name').capitalize(),
         max_length=150,
     )
     password = models.CharField(
-        _('password'),
+        _('password').capitalize(),
         max_length=150,
     )
 
@@ -46,3 +46,6 @@ class User(AbstractUser):
         verbose_name = _('User')
         verbose_name_plural = _('Users')
         ordering = ('id',)
+
+    def __str__(self):
+        return self.username

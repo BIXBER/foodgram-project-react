@@ -1,5 +1,5 @@
-from django.db import models
 from django.contrib.auth import get_user_model
+from django.db import models
 
 User = get_user_model()
 
@@ -30,7 +30,6 @@ class BaseNamedModel(models.Model):
     name = models.CharField(
         'Название',
         max_length=200,
-        unique=True,
         db_index=True,
     )
 

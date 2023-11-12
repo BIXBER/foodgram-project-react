@@ -1,18 +1,17 @@
 import base64
 
-from django.contrib.auth import get_user_model
-from django.core.files.base import ContentFile
 from django.conf import settings
+from django.contrib.auth import get_user_model
 from django.contrib.sites.shortcuts import get_current_site
+from django.core.files.base import ContentFile
 from django.db.models import F
 from djoser.serializers import UserCreateSerializer as DjoserCreateUser
 from rest_framework import serializers
 from rest_framework.fields import ReadOnlyField
 from rest_framework.validators import UniqueTogetherValidator
 
-from recipes.models import (
-    Tag, Ingredient, Recipe, IngredientRecipe, Favorite, Cart, Follow,
-)
+from recipes.models import (Cart, Favorite, Follow, Ingredient,
+                            IngredientRecipe, Recipe, Tag)
 
 User = get_user_model()
 
@@ -252,7 +251,6 @@ class RecipeSerializer(serializers.ModelSerializer):
 
 
 class RecipeSmallSerializer(serializers.ModelSerializer):
-    image = Base64ImageField()
 
     class Meta:
         model = Recipe

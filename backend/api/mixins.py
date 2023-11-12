@@ -7,10 +7,3 @@ class RetrieveListViewSet(
     viewsets.GenericViewSet
 ):
     pass
-
-
-class CreateListDestroyViewSet(
-    mixins.CreateModelMixin, mixins.ListModelMixin,
-    mixins.DestroyModelMixin, viewsets.GenericViewSet,
-):
-    pass
