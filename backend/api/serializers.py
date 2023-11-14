@@ -1,10 +1,7 @@
-import base64
-
 from django.conf import settings
 from django.contrib.auth import get_user_model
-from django.contrib.sites.shortcuts import get_current_site
-from django.core.files.base import ContentFile
 from django.db.models import F
+from drf_extra_fields.fields import Base64ImageField
 from djoser.serializers import UserCreateSerializer as DjoserCreateUser
 from rest_framework import serializers
 from rest_framework.fields import ReadOnlyField
@@ -17,20 +14,16 @@ User = get_user_model()
 
 MIN_VALUE_AMOUNT = 1
 
+CURRENT_SITE_DOMAIN = 'www.foodhelper.shop'
 
-class Base64ImageField(serializers.ImageField):
-    def to_internal_value(self, data):
-        if isinstance(data, str) and data.startswith('data:image'):
-            format, imgstr = data.split(';base64,')
-            ext = format.split('/')[-1]
-            data = ContentFile(base64.b64decode(imgstr), name='temp.' + ext)
-        return super().to_internal_value(data)
+
+class ImageField(Base64ImageField):
 
     def to_representation(self, path):
         request = self.context.get('request')
         if request is not None:
-            current_site = get_current_site(request)
-            image_url = (f'{request.scheme}://{current_site.domain}'
+            request = self.context.get('request')
+            image_url = (f'{request.scheme}://{CURRENT_SITE_DOMAIN}'
                          f'{settings.MEDIA_URL}{path}')
             return image_url
         return super().to_representation(path)
@@ -124,6 +117,7 @@ class RecipeReadSerializer(serializers.ModelSerializer):
     is_favorited = serializers.SerializerMethodField()
     is_in_shopping_cart = serializers.SerializerMethodField()
     tags = TagSerializer(many=True)
+    image = ImageField()
 
     class Meta:
         model = Recipe
@@ -172,7 +166,7 @@ class RecipeSerializer(serializers.ModelSerializer):
         many=True, queryset=Tag.objects.all(),
     )
     ingredients = RecipeIngredientWriteSerializer(many=True)
-    image = Base64ImageField()
+    image = ImageField()
 
     class Meta:
         model = Recipe
