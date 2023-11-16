@@ -1,12 +1,13 @@
-from core.models import BaseNamedModel, BaseRecipeModel
 from django.contrib.auth import get_user_model
 from django.core.validators import MinValueValidator
 from django.db import models
 
-from .validators import hex_validator
+from core.models import BaseNamedModel, BaseRecipeModel
 from core.constants import (MAX_CHARACTER_COUNT,
                             MAX_HEXFIELD_LENGTH,
                             MIN_VALUE_AMOUNT)
+from .validators import hex_validator
+
 
 User = get_user_model()
 

@@ -1,7 +1,5 @@
-# from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.db.models import F
-from drf_extra_fields.fields import Base64ImageField
 from djoser.serializers import UserCreateSerializer as DjoserCreateUser
 from rest_framework import serializers
 from rest_framework.fields import ReadOnlyField
@@ -10,22 +8,9 @@ from rest_framework.validators import UniqueTogetherValidator
 from recipes.models import (Cart, Favorite, Follow, Ingredient,
                             IngredientRecipe, Recipe, Tag)
 from core.constants import MIN_VALUE_AMOUNT
+from .fields import RelativeImageField
 
 User = get_user_model()
-
-# CURRENT_SITE_DOMAIN = 'www.foodhelper.shop'
-
-
-# class Base64ImageField(Base64ImageField):
-
-#     def to_representation(self, path):
-#         request = self.context.get('request')
-#         if request is not None:
-#             request = self.context.get('request')
-#             image_url = (f'{request.scheme}://{CURRENT_SITE_DOMAIN}'
-#                          f'{settings.MEDIA_URL}{path}')
-#             return image_url
-#         return super().to_representation(path)
 
 
 class UserCreateSerializer(DjoserCreateUser):
@@ -110,7 +95,7 @@ class RecipeReadSerializer(serializers.ModelSerializer):
     is_favorited = serializers.SerializerMethodField()
     is_in_shopping_cart = serializers.SerializerMethodField()
     tags = TagSerializer(many=True)
-    image = Base64ImageField()
+    image = RelativeImageField()
 
     class Meta:
         model = Recipe
@@ -159,7 +144,7 @@ class RecipeSerializer(serializers.ModelSerializer):
         many=True, queryset=Tag.objects.all(),
     )
     ingredients = RecipeIngredientWriteSerializer(many=True)
-    image = Base64ImageField()
+    image = RelativeImageField()
 
     class Meta:
         model = Recipe

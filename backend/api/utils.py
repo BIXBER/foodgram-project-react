@@ -1,6 +1,6 @@
 import csv
-from django.utils import timezone
 
+from django.utils import timezone
 from django.http.response import HttpResponse
 
 
