@@ -79,7 +79,7 @@ sudo docker compose up
 7. Перейти в директорию с файлом docker-compose.yml и выполнить миграции:
 ```bash
 cd ..
-docker compose exec backend python manage.py migrate
+sudo docker compose exec backend python manage.py migrate
 # Проект запустится на 8090 порту
 ```
 
@@ -87,9 +87,9 @@ docker compose exec backend python manage.py migrate
 
 ```bash
 # Загрузить ингредиенты в БД
-docker compose exec backend python manage.py load_ingredients
+sudo docker compose exec backend python manage.py load_ingredients
 # Загрузить теги в БД
-docker compose exec backend python manage.py load_tags
+sudo docker compose exec backend python manage.py load_tags
 ```
 
 9. [Открыть локальное подключение](http://localhost:8090) через браузер и начать пользоваться проектом!
