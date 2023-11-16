@@ -98,7 +98,8 @@ class RecipeViewSet(viewsets.ModelViewSet):
         serializer.save(author=self.request.user)
 
     @staticmethod
-    def create_object(serializers, user, recipe):
+    def create_object(serializers, user, pk):
+        recipe = get_object_or_404(Recipe, id=pk)
         data = {'user': user.id, 'recipe': recipe.id}
         serializer = serializers(data=data)
         serializer.is_valid(raise_exception=True)
@@ -113,8 +114,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
     @action(methods=('POST',), detail=True)
     def favorite(self, request, pk):
-        recipe_obj = get_object_or_404(Recipe, id=pk)
-        return self.create_object(FavoriteSerializer, request.user, recipe_obj)
+        return self.create_object(FavoriteSerializer, request.user, pk)
 
     @favorite.mapping.delete
     def delete_favorite(self, request, pk):
@@ -122,8 +122,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
     @action(methods=('POST',), detail=True)
     def shopping_cart(self, request, pk):
-        recipe_obj = get_object_or_404(Recipe, id=pk)
-        return self.create_object(CartSerializer, request.user, recipe_obj)
+        return self.create_object(CartSerializer, request.user, pk)
 
     @shopping_cart.mapping.delete
     def delete_shopping_cart(self, request, pk):

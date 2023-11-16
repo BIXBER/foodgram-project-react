@@ -1,11 +1,11 @@
 import csv
-from datetime import datetime as dt
+from django.utils import timezone
 
 from django.http.response import HttpResponse
 
 
 def build_file(user, ingredients, filename='shopping_list.txt'):
-    created_time = dt.now().strftime('%d.%m.%Y %H:%M')
+    created_time = timezone.now().strftime('%d.%m.%Y %H:%M')
 
     response = HttpResponse(content_type='text/plain; charset=utf-8')
     response['Content-Disposition'] = f'attachment; filename={filename}'

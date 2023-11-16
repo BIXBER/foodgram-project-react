@@ -1,6 +1,8 @@
 from django.contrib.auth import get_user_model
 from django.db import models
 
+from core.constants import MAX_CHARACTER_COUNT
+
 User = get_user_model()
 
 
@@ -29,7 +31,7 @@ class BaseRecipeModel(models.Model):
 class BaseNamedModel(models.Model):
     name = models.CharField(
         'Название',
-        max_length=200,
+        max_length=MAX_CHARACTER_COUNT,
         db_index=True,
     )
 

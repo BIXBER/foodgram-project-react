@@ -3,6 +3,11 @@ from django.contrib.auth.validators import UnicodeUsernameValidator
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
+from core.constants import (MAX_USERNAME_LENGTH,
+                            MAX_EMAILFIELD_LENGTH,
+                            MAX_NAME_LENGTH,
+                            MAX_PASSWORD_LENGTH)
+
 
 class User(AbstractUser):
 
@@ -10,7 +15,7 @@ class User(AbstractUser):
 
     username = models.CharField(
         _('username').capitalize(),
-        max_length=150,
+        max_length=MAX_USERNAME_LENGTH,
         unique=True,
         help_text=_('Required. Letters, digits and @/./+/-/_ only.'),
         validators=[unicode_validator],
@@ -20,7 +25,7 @@ class User(AbstractUser):
     )
     email = models.EmailField(
         _('email address').capitalize(),
-        max_length=254,
+        max_length=MAX_EMAILFIELD_LENGTH,
         unique=True,
         error_messages={
             'unique': _("A user with that email address already exists."),
@@ -28,15 +33,15 @@ class User(AbstractUser):
     )
     first_name = models.CharField(
         _('first name').capitalize(),
-        max_length=150,
+        max_length=MAX_NAME_LENGTH,
     )
     last_name = models.CharField(
         _('last name').capitalize(),
-        max_length=150,
+        max_length=MAX_NAME_LENGTH,
     )
     password = models.CharField(
         _('password').capitalize(),
-        max_length=150,
+        max_length=MAX_PASSWORD_LENGTH,
     )
 
     REQUIRED_FIELDS = ['username', 'first_name', 'last_name']

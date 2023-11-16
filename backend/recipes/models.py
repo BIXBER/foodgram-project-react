@@ -4,22 +4,23 @@ from django.core.validators import MinValueValidator
 from django.db import models
 
 from .validators import hex_validator
+from core.constants import (MAX_CHARACTER_COUNT,
+                            MAX_HEXFIELD_LENGTH,
+                            MIN_VALUE_AMOUNT)
 
 User = get_user_model()
-
-MIN_VALUE_AMOUNT = 1
 
 
 class Tag(BaseNamedModel):
     color = models.CharField(
         'Цвет в HEX',
-        max_length=7,
+        max_length=MAX_HEXFIELD_LENGTH,
         validators=(hex_validator,),
         help_text="Например: #FFF или #0F0F0F",
     )
     slug = models.SlugField(
         'Уникальный слаг',
-        max_length=200,
+        max_length=MAX_CHARACTER_COUNT,
         help_text='Не более 200 символов. Буквы, цифры и только @/./+/-/_',
     )
 
@@ -31,7 +32,7 @@ class Tag(BaseNamedModel):
 class Ingredient(BaseNamedModel):
     measurement_unit = models.CharField(
         'Единица измерения',
-        max_length=200,
+        max_length=MAX_CHARACTER_COUNT,
     )
 
     class Meta(BaseNamedModel.Meta):
@@ -67,7 +68,7 @@ class Recipe(models.Model):
     )
     name = models.CharField(
         'Название',
-        max_length=200,
+        max_length=MAX_CHARACTER_COUNT,
         db_index=True,
     )
     image = models.ImageField(
@@ -112,6 +113,14 @@ class IngredientRecipe(models.Model):
         'Количество в рецепте',
         validators=[MinValueValidator(MIN_VALUE_AMOUNT)],
     )
+
+    class Meta:
+        constraints = (
+            models.UniqueConstraint(
+                name='unique_ingredient_recipe',
+                fields=('ingredient', 'recipe'),
+            ),
+        )
 
     def __str__(self):
         return (f'"{self.ingredient.name.capitalize()}" '

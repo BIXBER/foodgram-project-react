@@ -1,4 +1,4 @@
-from django.conf import settings
+# from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.db.models import F
 from drf_extra_fields.fields import Base64ImageField
@@ -9,24 +9,23 @@ from rest_framework.validators import UniqueTogetherValidator
 
 from recipes.models import (Cart, Favorite, Follow, Ingredient,
                             IngredientRecipe, Recipe, Tag)
+from core.constants import MIN_VALUE_AMOUNT
 
 User = get_user_model()
 
-MIN_VALUE_AMOUNT = 1
-
-CURRENT_SITE_DOMAIN = 'www.foodhelper.shop'
+# CURRENT_SITE_DOMAIN = 'www.foodhelper.shop'
 
 
-class ImageField(Base64ImageField):
+# class Base64ImageField(Base64ImageField):
 
-    def to_representation(self, path):
-        request = self.context.get('request')
-        if request is not None:
-            request = self.context.get('request')
-            image_url = (f'{request.scheme}://{CURRENT_SITE_DOMAIN}'
-                         f'{settings.MEDIA_URL}{path}')
-            return image_url
-        return super().to_representation(path)
+#     def to_representation(self, path):
+#         request = self.context.get('request')
+#         if request is not None:
+#             request = self.context.get('request')
+#             image_url = (f'{request.scheme}://{CURRENT_SITE_DOMAIN}'
+#                          f'{settings.MEDIA_URL}{path}')
+#             return image_url
+#         return super().to_representation(path)
 
 
 class UserCreateSerializer(DjoserCreateUser):
@@ -97,18 +96,12 @@ class IngredientSerializer(serializers.ModelSerializer):
 class RecipeIngredientWriteSerializer(serializers.ModelSerializer):
     id = serializers.IntegerField(write_only=True)
     amount = serializers.IntegerField(required=True)
-    name = serializers.SerializerMethodField()
-    measurement_unit = serializers.SerializerMethodField()
+    name = ReadOnlyField(source='ingredient.name')
+    measurement_unit = ReadOnlyField(source='ingredient.measurement_unit')
 
     class Meta:
         model = IngredientRecipe
         fields = ('id', 'amount', 'name', 'measurement_unit')
-
-    def get_measurement_unit(self, ingredient):
-        return ingredient.measurement_unit
-
-    def get_name(self, ingredient):
-        return ingredient.name
 
 
 class RecipeReadSerializer(serializers.ModelSerializer):
@@ -117,7 +110,7 @@ class RecipeReadSerializer(serializers.ModelSerializer):
     is_favorited = serializers.SerializerMethodField()
     is_in_shopping_cart = serializers.SerializerMethodField()
     tags = TagSerializer(many=True)
-    image = ImageField()
+    image = Base64ImageField()
 
     class Meta:
         model = Recipe
@@ -166,7 +159,7 @@ class RecipeSerializer(serializers.ModelSerializer):
         many=True, queryset=Tag.objects.all(),
     )
     ingredients = RecipeIngredientWriteSerializer(many=True)
-    image = ImageField()
+    image = Base64ImageField()
 
     class Meta:
         model = Recipe
@@ -220,23 +213,14 @@ class RecipeSerializer(serializers.ModelSerializer):
         return tags
 
     def update(self, instance, validated_data):
-        fixed_fields = ['image', 'name', 'text', 'cooking_time']
-        for field in fixed_fields:
-            setattr(instance,
-                    field,
-                    validated_data.get(field, getattr(instance, field)))
-
-        instance.tags.clear()
-        instance.ingredients.clear()
-        tags_data = validated_data.get('tags')
-        ingredients_data = validated_data.get('ingredients')
-        self.validate_ingredients(ingredients_data)
-        self.validate_tags(tags_data)
+        tags_data = validated_data.pop('tags', [])
+        ingredients_data = validated_data.pop('ingredients', [])
+        super().update(instance, validated_data)
 
         instance.tags.set(tags_data)
-        IngredientRecipe.objects.filter(recipe=instance.id).delete()
+
+        IngredientRecipe.objects.filter(recipe=instance).delete()
         self.add_ingredients(ingredients_data, instance)
-        instance.save()
         return instance
 
     def to_representation(self, instance):
