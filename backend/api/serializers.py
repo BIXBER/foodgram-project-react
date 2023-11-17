@@ -1,6 +1,5 @@
 from django.contrib.auth import get_user_model
 from django.db.models import F
-from djoser.serializers import UserCreateSerializer as DjoserCreateUser
 from rest_framework import serializers
 from rest_framework.fields import ReadOnlyField
 from rest_framework.validators import UniqueTogetherValidator
@@ -11,15 +10,6 @@ from core.constants import MIN_VALUE_AMOUNT
 from .fields import RelativeImageField
 
 User = get_user_model()
-
-
-class UserCreateSerializer(DjoserCreateUser):
-
-    class Meta:
-        model = User
-        fields = (
-            'email', 'id', 'username', 'first_name', 'last_name', 'password',
-        )
 
 
 class UserSerializer(serializers.ModelSerializer):

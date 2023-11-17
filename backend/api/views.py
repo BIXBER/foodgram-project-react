@@ -2,7 +2,7 @@ from django.contrib.auth import get_user_model
 from django.db.models import F, Sum
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
-from djoser.views import UserViewSet
+from djoser.views import UserViewSet as DjoserUserViewSet
 from rest_framework import filters, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny, IsAuthenticated
@@ -16,15 +16,15 @@ from .permissions import AuthorOrReadOnly
 from .serializers import (CartSerializer, FavoriteSerializer, FollowSerializer,
                           IngredientSerializer, RecipeSerializer,
                           SubscribeSerializer, TagSerializer,
-                          UserCreateSerializer, UserSerializer)
+                          UserSerializer)
 from .utils import build_file
 from .pagination import UserPagination, RecipePagination
 
 User = get_user_model()
 
 
-class UserViewSet(UserViewSet):
-    serializer_class = UserCreateSerializer
+class UserViewSet(DjoserUserViewSet):
+    serializer_class = UserSerializer
     pagination_class = UserPagination
 
     @action(
