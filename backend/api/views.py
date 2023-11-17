@@ -18,12 +18,14 @@ from .serializers import (CartSerializer, FavoriteSerializer, FollowSerializer,
                           SubscribeSerializer, TagSerializer,
                           UserCreateSerializer, UserSerializer)
 from .utils import build_file
+from .pagination import UserPagination, RecipePagination
 
 User = get_user_model()
 
 
 class UserViewSet(UserViewSet):
     serializer_class = UserCreateSerializer
+    pagination_class = UserPagination
 
     @action(
         detail=False,
@@ -40,8 +42,8 @@ class UserViewSet(UserViewSet):
         permission_classes=[IsAuthenticated],
     )
     def subscribe(self, request, id):
-        user = get_object_or_404(User, pk=id)
-        following = request.user
+        user = request.user
+        following = get_object_or_404(User, pk=id)
         data = {'user': user.id, 'following': following.id}
         if request.method == 'POST':
             serializer = FollowSerializer(
@@ -50,7 +52,7 @@ class UserViewSet(UserViewSet):
             serializer.is_valid(raise_exception=True)
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
-        get_object_or_404(Follow, user=user, following=request.user).delete()
+        get_object_or_404(Follow, user=user, following=following).delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(
@@ -62,7 +64,7 @@ class UserViewSet(UserViewSet):
         return self.get_paginated_response(
             SubscribeSerializer(
                 self.paginate_queryset(
-                    Follow.objects.filter(following=request.user)
+                    Follow.objects.filter(user=request.user)
                 ),
                 many=True,
                 context={'request': request}
@@ -74,14 +76,12 @@ class TagViewSet(RetrieveListViewSet):
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
     permission_classes = (AllowAny,)
-    pagination_class = None
 
 
 class IngredientViewSet(RetrieveListViewSet):
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
     permission_classes = (AllowAny,)
-    pagination_class = None
     filter_backends = (IngredientSearchFilter, DjangoFilterBackend)
     search_fields = ('name',)
 
@@ -90,6 +90,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
     queryset = Recipe.objects.all()
     serializer_class = RecipeSerializer
     permission_classes = (AuthorOrReadOnly,)
+    pagination_class = RecipePagination
     filter_backends = (DjangoFilterBackend, filters.OrderingFilter)
     filterset_class = RecipeFilter
     ordering = ('-pub_date',)

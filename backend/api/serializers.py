@@ -256,11 +256,11 @@ class CartSerializer(serializers.ModelSerializer):
 
 
 class SubscribeSerializer(serializers.ModelSerializer):
-    id = ReadOnlyField(source='user.id')
-    email = ReadOnlyField(source='user.email')
-    username = ReadOnlyField(source='user.username')
-    first_name = ReadOnlyField(source='user.first_name')
-    last_name = ReadOnlyField(source='user.last_name')
+    id = ReadOnlyField(source='following.id')
+    email = ReadOnlyField(source='following.email')
+    username = ReadOnlyField(source='following.username')
+    first_name = ReadOnlyField(source='following.first_name')
+    last_name = ReadOnlyField(source='following.last_name')
     is_subscribed = serializers.SerializerMethodField()
     recipes = serializers.SerializerMethodField(read_only=True)
     recipes_count = serializers.SerializerMethodField(read_only=True)
@@ -271,7 +271,7 @@ class SubscribeSerializer(serializers.ModelSerializer):
                   'last_name', 'is_subscribed', 'recipes', 'recipes_count')
 
     def get_recipes(self, obj):
-        recipes_set = obj.user.author_recipes.all()
+        recipes_set = obj.following.author_recipes.all()
         request = self.context.get('request')
         if not request or request.user.is_anonymous:
             return False
